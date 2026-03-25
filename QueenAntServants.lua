@@ -13,6 +13,10 @@ player.CharacterAdded:Connect(function(c)
     root = c:WaitForChild("HumanoidRootPart")
 end)
 
+
+local rendering = require(ReplicatedStorage.Game.rendering)
+local interpolationBuffer = require(ReplicatedStorage.Game.rendering.interpolationBuffer)
+
 --// NETWORK
 local Packets = require(ReplicatedStorage.Modules:WaitForChild("Packets"))
 
