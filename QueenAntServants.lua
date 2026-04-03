@@ -23,7 +23,7 @@ local Packets = require(ReplicatedStorage.Modules:WaitForChild("Packets"))
 --// TIME
 local function getServerTime()
     local ok, res = pcall(function()
-        return require(ReplicatedStorage.Modules.Clock).getServerTime(true)
+        return require(ReplicatedStorage.Modules.Util).getServerTime(true)
     end)
     return ok and res or tick()
 end
@@ -134,7 +134,10 @@ local function swingServants()
                 local part = v.PrimaryPart or v:FindFirstChildWhichIsA("BasePart")
                 if part then
                     if (root.Position - part.Position).Magnitude <= RANGE then
-                        table.insert(hits, id) -- must be NUMBER only
+                        hits[#hits + 1] = {
+                            entityID = id,
+                            buffer = buffer
+                        }
                     end
                 end
             end
