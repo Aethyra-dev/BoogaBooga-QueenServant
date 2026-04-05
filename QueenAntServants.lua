@@ -136,7 +136,7 @@ local function swingServants()
                     if (root.Position - part.Position).Magnitude <= RANGE then
                         hits[#hits + 1] = {
                             entityID = id,
-                            buffer = buffer
+                            buffer = interpolationBuffer.getBuffer(rendering.clientBuffer)
                         }
                     end
                 end
@@ -148,8 +148,7 @@ local function swingServants()
         Packets.SwingTool.send({
             entityIDs = hits,      -- array of numbers
             cframe = char:GetPivot(),
-            timestamp = now,
-            buffer = buffer        -- one buffer only
+            timestamp = now
         })
     end
 end
