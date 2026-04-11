@@ -13,7 +13,6 @@ player.CharacterAdded:Connect(function(c)
     root = c:WaitForChild("HumanoidRootPart")
 end)
 
-
 local rendering = require(ReplicatedStorage.Game.rendering)
 local interpolationBuffer = require(ReplicatedStorage.Game.rendering.interpolationBuffer)
 
@@ -23,19 +22,20 @@ local Packets = require(ReplicatedStorage.Modules:WaitForChild("Packets"))
 --// TIME
 local function getServerTime()
     local ok, res = pcall(function()
-        return require(ReplicatedStorage.Modules.Util).getServerTime(true)
+        return require(ReplicatedStorage.Modules.Clock).getServerTime(true)
     end)
     return ok and res or tick()
 end
 
 --// SETTINGS
 local AUTO_SWING = false
+local AUTO_SWING2 = false
 local RANGE = 25
 local lastSwing = 0
 
 --// GUI
 local gui = Instance.new("ScreenGui")
-gui.Name = "AntFarm"
+gui.Name = "GoldNodeFarm"
 gui.Parent = player:WaitForChild("PlayerGui")
 gui.ResetOnSpawn = false
 gui.IgnoreGuiInset = true
@@ -53,7 +53,7 @@ Instance.new("UICorner", frame)
 -- TITLE
 local title = Instance.new("TextLabel", frame)
 title.Size = UDim2.new(1,0,0,25)
-title.Text = "Queen Ant Servant Farm"
+title.Text = "Gold Node Farm"
 title.BackgroundTransparency = 1
 title.TextColor3 = Color3.new(1,1,1)
 title.Font = Enum.Font.GothamBold
@@ -69,6 +69,16 @@ toggle.TextColor3 = Color3.new(1,1,1)
 toggle.Font = Enum.Font.Gotham
 toggle.TextSize = 13
 Instance.new("UICorner", toggle)
+
+local toggle2 = Instance.new("TextButton", frame)
+toggle2.Size = UDim2.new(0.9,0,0,30)
+toggle2.Position = UDim2.new(0.05,0,0,115)
+toggle2.Text = "Auto Q Swing: OFF"
+toggle2.BackgroundColor3 = Color3.fromRGB(40,40,40)
+toggle2.TextColor3 = Color3.new(1,1,1)
+toggle2.Font = Enum.Font.Gotham
+toggle2.TextSize = 13
+Instance.new("UICorner", toggle2)
 
 -- HIDE BUTTON
 local hide = Instance.new("TextButton", frame)
@@ -100,6 +110,10 @@ toggle.MouseButton1Click:Connect(function()
     AUTO_SWING = not AUTO_SWING
     toggle.Text = "Auto Swing: " .. (AUTO_SWING and "ON" or "OFF")
 end)
+toggle2.MouseButton1Click:Connect(function()
+    AUTO_SWING2 = not AUTO_SWING2
+    toggle2.Text = "Auto Q Swing: " .. (AUTO_SWING2 and "ON" or "OFF")
+end)
 
 -- HIDE GUI
 hide.MouseButton1Click:Connect(function()
@@ -113,10 +127,10 @@ showBtn.MouseButton1Click:Connect(function()
     showBtn.Visible = false
 end)
 
---// Swing Queen Ant's Servants
-local function swingServants()
+--// SWING ANTSSSSSSSSSSSSSSSSSSSSSS
+local function swingAnts()
     local now = getServerTime()
-    if now - lastSwing < 0.05 then return end
+    if now - lastSwing < 0.08 then return end
     lastSwing = now
 
     local hits = {}
@@ -149,10 +163,47 @@ local function swingServants()
         })
     end
 end
+local function swingQAnts()
+    local now = getServerTime()
+    if now - lastSwing < 0.08 then return end
+    lastSwing = now
 
+    local hits = {}
+
+    local critters = workspace:FindFirstChild("Critters")
+    if not critters then return end
+
+    for _, v in pairs(critters:GetChildren()) do
+        if v:IsA("Model") and v.Name == "Queen Ant" then
+            local id = v:GetAttribute("EntityID")
+            if id then
+                local part = v.PrimaryPart or v:FindFirstChildWhichIsA("BasePart")
+                if part then
+                    if (root.Position - part.Position).Magnitude <= RANGE then
+                        hits[#hits + 1] = {
+                            entityID = id,
+                            buffer = interpolationBuffer.getBuffer(rendering.clientBuffer) or nil
+                        }
+                    end
+                end
+            end
+        end
+    end
+
+    if #hits > 0 then
+        Packets.SwingTool.send({
+            entityIDs = hits,      -- array of numbers
+            cframe = char:GetPivot(),
+            timestamp = now
+        })
+    end
+end
 --// LOOP
 RunService.RenderStepped:Connect(function()
     if AUTO_SWING then
-        swingServants()
+        swingAnts()
+    end
+    if AUTO_SWING2 then
+        swingQAnts()
     end
 end)
