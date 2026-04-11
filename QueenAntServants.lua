@@ -124,9 +124,6 @@ local function swingServants()
     local critters = workspace:FindFirstChild("Critters")
     if not critters then return end
 
-    -- get the real interpolation buffer (same as the game script)
-    local buffer = interpolationBuffer.getBuffer(rendering.clientBuffer)
-
     for _, v in pairs(critters:GetChildren()) do
         if v:IsA("Model") and v.Name == "Queen Ant's Servant" then
             local id = v:GetAttribute("EntityID")
@@ -136,7 +133,7 @@ local function swingServants()
                     if (root.Position - part.Position).Magnitude <= RANGE then
                         hits[#hits + 1] = {
                             entityID = id,
-                            buffer = interpolationBuffer.getBuffer(rendering.clientBuffer)
+                            buffer = interpolationBuffer.getBuffer(rendering.clientBuffer) or nil
                         }
                     end
                 end
